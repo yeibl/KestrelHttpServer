@@ -16,6 +16,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
             _currentIConnectionTransportFeature = this;
             _currentIHttpConnectionFeature = this;
             _currentIConnectionItemsFeature = this;
+            _currentIConnectionLifetimeFeature = this;
             _currentIApplicationTransportFeature = this;
             _currentIMemoryPoolFeature = this;
             _currentITransportSchedulerFeature = this;
@@ -50,5 +51,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
 
         public PipeWriter Input => Application.Output;
         public PipeReader Output => Application.Input;
+
+        public abstract void Abort();
     }
 }

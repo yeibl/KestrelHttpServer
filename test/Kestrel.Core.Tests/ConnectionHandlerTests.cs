@@ -52,6 +52,11 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
             public override PipeScheduler InputWriterScheduler => PipeScheduler.ThreadPool;
 
             public override PipeScheduler OutputReaderScheduler => PipeScheduler.ThreadPool;
+
+            public override void Abort()
+            {
+
+            }
         }
     }
 }

@@ -13,5 +13,7 @@ namespace Microsoft.AspNetCore.Protocols
         public abstract IDictionary<object, object> Items { get; set; }
 
         public abstract IDuplexPipe Transport { get; set; }
+
+        public abstract void Abort();
     }
 }

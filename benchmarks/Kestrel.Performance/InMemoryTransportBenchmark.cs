@@ -204,6 +204,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Performance
                     }
                 }
             }
+
+            public override void Abort()
+            {
+            }
         }
 
         // Copied from https://github.com/aspnet/benchmarks/blob/dev/src/Benchmarks/Middleware/PlaintextMiddleware.cs

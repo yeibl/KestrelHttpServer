@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal;
 
 namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.Internal
 {
-    public class LibuvConnectionContext : TransportConnection
+    public abstract class LibuvConnectionContext : TransportConnection
     {
         public LibuvConnectionContext(ListenerContext context)
         {

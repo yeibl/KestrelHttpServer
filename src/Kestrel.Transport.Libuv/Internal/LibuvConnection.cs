@@ -51,6 +51,15 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.Internal
         private IConnectionHandler ConnectionHandler => ListenerContext.TransportContext.ConnectionHandler;
         private LibuvThread Thread => ListenerContext.Thread;
 
+        public override void Abort()
+        {
+            Thread.Post(connection =>
+            {
+                connection._socket.Dispose();
+            },
+            this);
+        }
+
         public async Task Start()
         {
             try

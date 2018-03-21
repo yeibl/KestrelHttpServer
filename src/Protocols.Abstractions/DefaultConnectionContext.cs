@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO.Pipelines;
+using System.Threading;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Protocols.Features;
 
@@ -23,6 +24,9 @@ namespace Microsoft.AspNetCore.Protocols
         private IConnectionItemsFeature ConnectionItemsFeature =>
             _features.Fetch(ref _features.Cache.ConnectionItems, _ => null);
 
+        private IConnectionLifetimeFeature ConnectionLifetimeFeature =>
+            _features.Fetch(ref _features.Cache.ConnectionLifetime, _ => null);
+
         public override string ConnectionId
         {
             get => ConnectionIdFeature.ConnectionId;
@@ -43,6 +47,8 @@ namespace Microsoft.AspNetCore.Protocols
             set => ConnectionItemsFeature.Items = value;
         }
 
+        public override void Abort() => ConnectionLifetimeFeature.Abort();
+
         struct FeatureInterfaces
         {
             public IConnectionIdFeature ConnectionId;
@@ -50,6 +56,8 @@ namespace Microsoft.AspNetCore.Protocols
             public IConnectionTransportFeature ConnectionTransport;
 
             public IConnectionItemsFeature ConnectionItems;
+
+            public IConnectionLifetimeFeature ConnectionLifetime;
         }
     }
 }

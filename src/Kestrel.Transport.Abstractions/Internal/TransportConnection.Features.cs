@@ -14,6 +14,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
                                                IConnectionIdFeature,
                                                IConnectionTransportFeature,
                                                IConnectionItemsFeature,
+                                               IConnectionLifetimeFeature,
                                                IMemoryPoolFeature,
                                                IApplicationTransportFeature,
                                                ITransportSchedulerFeature
@@ -22,6 +23,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
         private static readonly Type IConnectionIdFeatureType = typeof(IConnectionIdFeature);
         private static readonly Type IConnectionTransportFeatureType = typeof(IConnectionTransportFeature);
         private static readonly Type IConnectionItemsFeatureType = typeof(IConnectionItemsFeature);
+        private static readonly Type IConnectionLifetimeFeatureType = typeof(IConnectionLifetimeFeature);
         private static readonly Type IMemoryPoolFeatureType = typeof(IMemoryPoolFeature);
         private static readonly Type IApplicationTransportFeatureType = typeof(IApplicationTransportFeature);
         private static readonly Type ITransportSchedulerFeatureType = typeof(ITransportSchedulerFeature);
@@ -30,6 +32,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
         private object _currentIConnectionIdFeature;
         private object _currentIConnectionTransportFeature;
         private object _currentIConnectionItemsFeature;
+        private object _currentIConnectionLifetimeFeature;
         private object _currentIMemoryPoolFeature;
         private object _currentIApplicationTransportFeature;
         private object _currentITransportSchedulerFeature;
@@ -130,6 +133,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
         PipeScheduler ITransportSchedulerFeature.InputWriterScheduler => InputWriterScheduler;
         PipeScheduler ITransportSchedulerFeature.OutputReaderScheduler => OutputReaderScheduler;
 
+        void IConnectionLifetimeFeature.Abort() => Abort();
+
+
         object IFeatureCollection.this[Type key]
         {
             get
@@ -152,6 +158,11 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
                 if (key == IConnectionItemsFeatureType)
                 {
                     return _currentIConnectionItemsFeature;
+                }
+
+                if (key == IConnectionLifetimeFeatureType)
+                {
+                    return _currentIConnectionLifetimeFeature;
                 }
 
                 if (key == IMemoryPoolFeatureType)
@@ -196,6 +207,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
                 {
                     _currentIConnectionItemsFeature = value;
                 }
+                else if (key == IConnectionLifetimeFeatureType)
+                {
+                    _currentIConnectionLifetimeFeature = value;
+                }
                 else if (key == IMemoryPoolFeatureType)
                 {
                     _currentIMemoryPoolFeature = value;
@@ -232,6 +247,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
             else if (typeof(TFeature) == typeof(IConnectionItemsFeature))
             {
                 return (TFeature)_currentIConnectionItemsFeature;
+            }
+            else if (typeof(TFeature) == typeof(IConnectionLifetimeFeature))
+            {
+                return (TFeature)_currentIConnectionLifetimeFeature;
             }
             else if (typeof(TFeature) == typeof(IMemoryPoolFeature))
             {
@@ -272,6 +291,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.Internal
             else if (typeof(TFeature) == typeof(IConnectionItemsFeature))
             {
                 _currentIConnectionItemsFeature = instance;
+            }
+            else if (typeof(TFeature) == typeof(IConnectionLifetimeFeature))
+            {
+                _currentIConnectionLifetimeFeature = instance;
             }
             else if (typeof(TFeature) == typeof(IMemoryPoolFeature))
             {
