@@ -1065,16 +1065,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
         [Fact]
         public async Task DATA_Received_NoStreamWindowSpace_ConnectionError()
         {
-            // I hate doing this, but it avoids exceptions from MemoryPool.Dipose() in debug mode. The problem is since
-            // the stream's ProcessRequestsAsync loop is never awaited by the connection, it's not really possible to
-            // observe when all the blocks are returned. This can be removed after we implement graceful shutdown.
-            Dispose();
-            InitializeConnectionFields(new DiagnosticMemoryPool(KestrelMemoryPool.CreateSlabMemoryPool(), allowLateReturn: true));
-
             // _maxData should be 1/4th of the default initial window size + 1.
             Assert.Equal(Http2PeerSettings.DefaultInitialWindowSize + 1, (uint)_maxData.Length * 4);
 
-            await InitializeConnectionAsync(_waitForAbortApplication);
+            await InitializeConnectionAsync(_noopApplication);
 
             await StartStreamAsync(1, _browserRequestHeaders, endStream: false);
 
@@ -1084,7 +1078,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
             await SendDataAsync(1, _maxData, endStream: false);
 
             await WaitForConnectionErrorAsync<Http2ConnectionErrorException>(
-                ignoreNonGoAwayFrames: false,
+                ignoreNonGoAwayFrames: true,
                 expectedLastStreamId: 1,
                 expectedErrorCode: Http2ErrorCode.FLOW_CONTROL_ERROR,
                 expectedErrorMessage: CoreStrings.Http2ErrorFlowControlWindowExceeded);
@@ -1093,16 +1087,10 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
         [Fact]
         public async Task DATA_Received_NoConnectionWindowSpace_ConnectionError()
         {
-            // I hate doing this, but it avoids exceptions from MemoryPool.Dipose() in debug mode. The problem is since
-            // the stream's ProcessRequestsAsync loop is never awaited by the connection, it's not really possible to
-            // observe when all the blocks are returned. This can be removed after we implement graceful shutdown.
-            Dispose();
-            InitializeConnectionFields(new DiagnosticMemoryPool(KestrelMemoryPool.CreateSlabMemoryPool(), allowLateReturn: true));
-
             // _maxData should be 1/4th of the default initial window size + 1.
             Assert.Equal(Http2PeerSettings.DefaultInitialWindowSize + 1, (uint)_maxData.Length * 4);
 
-            await InitializeConnectionAsync(_waitForAbortApplication);
+            await InitializeConnectionAsync(_noopApplication);
 
             await StartStreamAsync(1, _browserRequestHeaders, endStream: false);
             await SendDataAsync(1, _maxData, endStream: false);
@@ -1113,7 +1101,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
             await SendDataAsync(3, _maxData, endStream: false);
 
             await WaitForConnectionErrorAsync<Http2ConnectionErrorException>(
-                ignoreNonGoAwayFrames: false,
+                ignoreNonGoAwayFrames: true,
                 expectedLastStreamId: 3,
                 expectedErrorCode: Http2ErrorCode.FLOW_CONTROL_ERROR,
                 expectedErrorMessage: CoreStrings.Http2ErrorFlowControlWindowExceeded);
@@ -3287,7 +3275,7 @@ namespace Microsoft.AspNetCore.Server.Kestrel.Core.Tests
             _pair.Application.Output.Complete(new ConnectionResetException(string.Empty));
 
             var result = await _pair.Application.Input.ReadAsync();
-            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCompleted);
             Assert.Single(_logger.Messages, m => m.Exception is ConnectionResetException);
         }
 
